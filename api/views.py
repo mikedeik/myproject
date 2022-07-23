@@ -1,6 +1,6 @@
 from django.shortcuts import render , HttpResponse
-from .models import Person
-from .serializers import PersonSerializer
+from .models import Person, Bidder, Seller, Category, Item
+from .serializers import PersonSerializer, UserSerializer, CategorySerializer , BidderSerializer
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
@@ -10,16 +10,29 @@ from rest_framework.decorators import  APIView
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
 # Create your views here.
 
 
 def Index(request):
     return HttpResponse("Hello there!")
 
+# class PersonViewSet(viewsets.ModelViewSet):
+#     queryset = Person.objects.all()
+#     serializer_class = PersonSerializer
+
+
+''' GENERICS AND MIXINS'''
+
 
 class PersonList(generics.GenericAPIView , mixins.ListModelMixin ,mixins.CreateModelMixin):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
 
     def get(self, request):
         return self.list(request)
@@ -27,12 +40,15 @@ class PersonList(generics.GenericAPIView , mixins.ListModelMixin ,mixins.CreateM
     def post(self, request, *args, **kwargs):
         return self.create(request)
 
-class PersonDetails(generics.GenericAPIView , mixins.RetrieveModelMixin , mixins.UpdateModelMixin , mixins.DestroyModelMixin):
+
+class PersonDetails(generics.GenericAPIView, mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
 
     lookup_field = 'id'
-
 
     def get(self ,request ,id):
         return self.retrieve(request , id = id)
@@ -42,6 +58,85 @@ class PersonDetails(generics.GenericAPIView , mixins.RetrieveModelMixin , mixins
 
     def delete(self , request , id):
         return  self.destroy(request , id = id)
+
+
+''' USer views'''
+
+
+class UserList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [AllowAny]
+    # authentication_classes = (TokenAuthentication,)
+
+    def get(self, request):
+        return self.list(request)
+
+    def post(self, request):
+        return self.create(request)
+
+
+class UserDetails(generics.GenericAPIView, mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [IsAuthenticated]
+    # authentication_classes = (TokenAuthentication,)
+
+    lookup_field = 'id'
+
+    def get(self, request, id):
+        return self.retrieve(request, id=id)
+
+    def put(self, request, id):
+        return self.update(request, id=id)
+
+    def delete(self, request, id):
+        return self.destroy(request, id=id)
+
+
+class CategoryList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'CategoryId'
+
+    def get(self, request):
+        return self.list(request)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request)
+
+
+class CategoryHandle(generics.GenericAPIView, mixins.RetrieveModelMixin,
+                     mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    lookup_field = 'CategoryId'
+
+    def get(self, request, CategoryId):
+        return self.retrieve(request , CategoryId = CategoryId)
+
+    def put(self, request, CategoryId):
+        return self.update(request, CategoryId = CategoryId)
+
+    def delete(self, request , CategoryId):
+        return self.destroy(request, CategoryId=CategoryId)
+
+
+class BidderList(generics.GenericAPIView , mixins.ListModelMixin ,mixins.CreateModelMixin):
+    queryset = Bidder.objects.all()
+    serializer_class = BidderSerializer
+    # permission_classes = [AllowAny]
+    # authentication_classes = (TokenAuthentication,)
+
+    def get(self, request):
+        return self.list(request)
+
+    def post(self, request):
+        return self.create(request)
+
+
 
 
 '''
